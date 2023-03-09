@@ -2,6 +2,8 @@ const notes = require('express').Router();
 const fs = require('fs');
 const util = require('util');
 
+let noteIndex = 0;
+
 // Helper functions
 const readFromFile = util.promisify(fs.readFile);
 
@@ -18,29 +20,46 @@ const readAndAppend = (content, file) => {
         const parsedData = JSON.parse(data);
         parsedData.push(content);
         writeToFile(file, parsedData);
+        noteIndex++;
       }
     });
 };
 
-notes.get('/', (req, res) => {
+// const removeNote = (noteId, file) => {
+//   fs.readFile(file, 'utf8', (error, data) => {
+//     if (error) {
+//       console.log(error);
+//       return;
+//     } else {
+//       for (let i = 0; i < notesIndex)
+//     }
+
+//   });
+// };
+
+notes.get('/notes', (req, res) => {
     readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
 });
 
-notes.post('/', (req, res) => {
+notes.post('/notes', (req, res) => {
+
     console.log(req.body);
 
-    const { title, text } = req.body;
+    req.body.id = noteIndex;
+
+    const { title, text, id } = req.body;
 
     if (req.body) {
         const newNote = {
         title,
-        text
+        text,
+        id
         };
 
     readAndAppend(newNote, './db/db.json');
     res.json(`Note added successfully`);
   } else {
-    res.error('Error in adding note');
+    res.errored('Error in adding note');
   }
 });
 
