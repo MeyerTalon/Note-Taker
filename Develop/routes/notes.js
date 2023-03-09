@@ -1,8 +1,15 @@
-const express = require('express').Router();
+const notes = require('express').Router();
 const fs = require('fs');
 const util = require('util');
 
+// Helper functions
 const readFromFile = util.promisify(fs.readFile);
+
+const writeToFile = (destination, content) =>
+  fs.writeFile(destination, JSON.stringify(content, null, 4), (err) =>
+    err ? console.error(err) : console.info(`\nData written to ${destination}`)
+  );
+
 const readAndAppend = (content, file) => {
     fs.readFile(file, 'utf8', (err, data) => {
       if (err) {
@@ -15,13 +22,11 @@ const readAndAppend = (content, file) => {
     });
 };
 
-const note = express();
-
-note.get('/', (req, res) => {
+notes.get('/', (req, res) => {
     readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
 });
 
-note.post('/', (req, res) => {
+notes.post('/', (req, res) => {
     console.log(req.body);
 
     const { title, text } = req.body;
@@ -37,6 +42,6 @@ note.post('/', (req, res) => {
   } else {
     res.error('Error in adding note');
   }
-})
+});
 
-module.exports = note;
+module.exports = notes;
