@@ -8,7 +8,7 @@ const readFromFile = util.promisify(fs.readFile);
 
 const writeToFile = (destination, content) =>
   fs.writeFile(destination, JSON.stringify(content, null, 4), (err) =>
-    err ? console.error(err) : console.info(`\nData written to ${destination}`)
+    err ? console.error(err) : console.info(`\nData written to ${destination}\n`)
   );
 
 const readAndAppend = (content, file) => {
@@ -23,6 +23,7 @@ const readAndAppend = (content, file) => {
     });
 };
 
+// This code block populates the noteIdArr with the prexisting note ids found in the db.json file
 let noteIdArr = [];
 fs.readFile('./db/db.json', 'utf8', (err, data) => {
   if (err) {
@@ -31,12 +32,12 @@ fs.readFile('./db/db.json', 'utf8', (err, data) => {
   }
   const noteData = JSON.parse(data);
   for (let i = 0; i < noteData.length; i++) {
-    noteIdArr.push(noteData[i]);
+    noteIdArr.push(noteData[i].id);
   }
 });
 
-
-
+// creatId() function creates and returns a unique id
+// also adds the unique id to the noteIdArr
 const createId = () => {
   let noteId = Math.floor(Math.random() * 99) + 1;
   if (noteIdArr.length === 0) {
@@ -53,17 +54,17 @@ const createId = () => {
   return noteIdArr[noteIdArr.length - 1];
 };
 
-// const removeNote = (noteId, file) => {
-//   fs.readFile(file, 'utf8', (error, data) => {
-//     if (error) {
-//       console.log(error);
-//       return;
-//     } else {
-//       for (let i = 0; i < notesIndex)
-//     }
+const removeNote = (noteId, noteData) => {
+  for (let i = 0; i < noteData.length; i++) {
+    if (noteData[i].id == noteId) {
+      console.log('Deleting note:');
+      console.log(noteData[i]);
+      noteData.splice(i, 1);
+    }
+  }
+  writeToFile('./db/db.json', noteData);
+};
 
-//   });
-// };
 
 notes.get('/notes', (req, res) => {
     readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
@@ -89,6 +90,19 @@ notes.post('/notes', (req, res) => {
   } else {
     res.errored('Error in adding note');
   }
+});
+
+notes.delete('/notes/:id', async (req, res) => {
+  const { id } = req.params;
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    const noteData = JSON.parse(data);
+    removeNote(id, noteData);
+  });
+  res.json('Note deleted successfully')
 });
 
 module.exports = notes;
