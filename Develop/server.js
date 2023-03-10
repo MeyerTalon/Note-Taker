@@ -6,16 +6,19 @@ const PORT = process.env.PORT || 3001;
 
 const app = express();
 
+// Sets up all the necesarry middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api', api);
 
 app.use(express.static('public'));
 
+// get route for the notes.html file
 app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/notes.html'))
 });
 
+// get route for the index.html file
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))
 });

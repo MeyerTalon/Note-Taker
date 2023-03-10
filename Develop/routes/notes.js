@@ -54,6 +54,7 @@ const createId = () => {
   return noteIdArr[noteIdArr.length - 1];
 };
 
+// Finds the specific note to remove, removes it, and rewrites the information to the json file
 const removeNote = (noteId, noteData) => {
   for (let i = 0; i < noteData.length; i++) {
     if (noteData[i].id == noteId) {
@@ -65,11 +66,12 @@ const removeNote = (noteId, noteData) => {
   writeToFile('./db/db.json', noteData);
 };
 
-
+// notes get route
 notes.get('/notes', (req, res) => {
     readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
 });
 
+// notes post route
 notes.post('/notes', (req, res) => {
 
     console.log(req.body);
@@ -92,6 +94,7 @@ notes.post('/notes', (req, res) => {
   }
 });
 
+// notes delete route
 notes.delete('/notes/:id', async (req, res) => {
   const { id } = req.params;
   fs.readFile('./db/db.json', 'utf8', (err, data) => {
