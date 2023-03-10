@@ -2,7 +2,6 @@ const notes = require('express').Router();
 const fs = require('fs');
 const util = require('util');
 
-let noteIndex = 0;
 
 // Helper functions
 const readFromFile = util.promisify(fs.readFile);
@@ -20,9 +19,38 @@ const readAndAppend = (content, file) => {
         const parsedData = JSON.parse(data);
         parsedData.push(content);
         writeToFile(file, parsedData);
-        noteIndex++;
       }
     });
+};
+
+let noteIdArr = [];
+fs.readFile('./db/db.json', 'utf8', (err, data) => {
+  if (err) {
+    console.log(err);
+    return;
+  }
+  const noteData = JSON.parse(data);
+  for (let i = 0; i < noteData.length; i++) {
+    noteIdArr.push(noteData[i]);
+  }
+});
+
+
+
+const createId = () => {
+  let noteId = Math.floor(Math.random() * 99) + 1;
+  if (noteIdArr.length === 0) {
+    noteIdArr.push(noteId);
+  } else {
+    for (let i = 0; i < noteIdArr.length; i++) {
+      if (noteIdArr[i] === noteId) {
+        noteId = Math.floor(Math.random() * 99) + 1;
+        i = 0;
+      }
+    }
+    noteIdArr.push(noteId);
+  }
+  return noteIdArr[noteIdArr.length - 1];
 };
 
 // const removeNote = (noteId, file) => {
@@ -45,7 +73,7 @@ notes.post('/notes', (req, res) => {
 
     console.log(req.body);
 
-    req.body.id = noteIndex;
+    req.body.id = createId();
 
     const { title, text, id } = req.body;
 
